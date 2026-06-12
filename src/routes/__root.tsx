@@ -77,16 +77,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Tste" },
-      { name: "description", content: "." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Tste" },
-      { property: "og:description", content: "." },
+      { title: "Alerta Metro — Viaja segura en el Metro de Santiago" },
+      {
+        name: "description",
+        content:
+          "App para reportar acoso o violencia en el Metro de Santiago y enviar ayuda inmediata a la estación.",
+      },
+      { name: "author", content: "Under water — Universidad Andrés Bello" },
+      { property: "og:title", content: "Alerta Metro — Viaja segura en el Metro de Santiago" },
+      {
+        property: "og:description",
+        content: "Reporta acoso o violencia con un toque y recibe ayuda inmediata en tu estación.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Tste" },
-      { name: "twitter:description", content: "." },
+      { name: "twitter:title", content: "Alerta Metro — Viaja segura en el Metro de Santiago" },
+      {
+        name: "twitter:description",
+        content: "Reporta acoso o violencia con un toque y recibe ayuda inmediata en tu estación.",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -106,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
