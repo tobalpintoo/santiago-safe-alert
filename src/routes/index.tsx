@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast, Toaster } from "sonner";
-import { ShieldAlert, MapPin, Bell, Lock, ArrowRight, Mail } from "lucide-react";
+import { ShieldAlert, MapPin, Bell, Lock, ArrowRight, ClipboardList } from "lucide-react";
 import demoVideo from "@/assets/demo.mov.asset.json";
-import { submitContactForm } from "@/lib/api/contact.functions";
-import { contactSchema, type ContactForm } from "@/lib/contact-schema";
+import { submitSurvey } from "@/lib/api/survey.functions";
+import { surveySchema, type SurveyForm } from "@/lib/survey-schema";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,7 +39,7 @@ function Landing() {
       <Problem />
       <HowItWorks />
       <Benefits />
-      <Contact />
+      <Survey />
       <Footer />
     </main>
   );
@@ -56,10 +56,10 @@ function Nav() {
           Alerta Metro
         </a>
         <a
-          href="#contacto"
+          href="#encuesta"
           className="rounded-full border border-border px-4 py-1.5 text-sm font-medium transition hover:border-primary hover:text-primary"
         >
-          Contacto
+          Encuesta
         </a>
       </div>
     </header>
@@ -94,7 +94,7 @@ function Hero() {
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
-            href="#contacto"
+            href="#encuesta"
             className="group inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             Quiero saber más
@@ -228,109 +228,322 @@ function Benefits() {
   );
 }
 
-function Contact() {
+function Survey() {
   const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+
   const {
     register,
     handleSubmit,
-    reset,
+    control,
     formState: { errors },
-  } = useForm<ContactForm>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: { name: "", email: "", message: "", company: "" },
+  } = useForm<SurveyForm>({
+    resolver: zodResolver(surveySchema),
+    defaultValues: {
+      website: "",
+      velocidad: 0 as unknown as number,
+      discrecion: 0 as unknown as number,
+      facilidad: 0 as unknown as number,
+      confianza: 0 as unknown as number,
+      mejoras: "",
+    },
   });
 
-  const onSubmit = async (data: ContactForm) => {
+  const onSubmit = async (data: SurveyForm) => {
     setSubmitting(true);
     try {
-      const result = await submitContactForm({ data });
+      const result = await submitSurvey({ data });
       if (result.ok) {
-        toast.success("¡Gracias! Te contactaremos pronto.");
-        reset();
+        setDone(true);
+        toast.success("¡Gracias por participar!");
       } else {
         toast.error(result.error);
       }
     } catch {
-      toast.error("No se pudo enviar el mensaje. Intenta más tarde.");
+      toast.error("No se pudo enviar. Intenta más tarde.");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <section id="contacto" className="px-6 py-24">
-      <div className="mx-auto max-w-3xl">
+    <section id="encuesta" className="px-6 py-24">
+      <div className="mx-auto max-w-2xl">
+        {/* Header */}
         <div className="text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-primary">
-            <Mail className="h-3 w-3" /> Contacto
+            <ClipboardList className="h-3 w-3" /> Encuesta de Validación
           </span>
           <h2 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
-            ¿Quieres ser parte?
+            Tu opinión importa
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-            Cuéntanos si te interesa colaborar, invertir, sumarte al equipo o
-            probar la app cuando esté lista.
+          <p className="mx-auto mt-4 max-w-lg text-sm text-muted-foreground">
+            Esta encuesta busca conocer tu opinión sobre la plataforma. Tus respuestas son
+            anónimas y se usan solo con fines académicos. Toma menos de 3 minutos.
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="mt-12 space-y-5 rounded-2xl border border-border bg-card p-6 sm:p-8"
-        >
-          {/* Honeypot field: hidden from sighted users and screen readers,
-              but visible to most basic form-filling bots. Real users
-              should never interact with this. */}
-          <div
-            className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden"
-            aria-hidden="true"
-          >
-            <label htmlFor="company">Empresa</label>
-            <input
-              id="company"
-              type="text"
-              tabIndex={-1}
-              autoComplete="off"
-              {...register("company")}
-            />
+        {done ? (
+          <div className="mt-12 rounded-2xl border border-primary/30 bg-card p-10 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl text-white">
+              ✓
+            </div>
+            <h3 className="text-xl font-bold">¡Respuesta registrada!</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Gracias por ayudarnos a mejorar Alerta Metro.
+            </p>
           </div>
-
-          <Field label="Nombre" error={errors.name?.message}>
-            <input
-              {...register("name")}
-              maxLength={100}
-              placeholder="Tu nombre"
-              className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
-            />
-          </Field>
-          <Field label="Email" error={errors.email?.message}>
-            <input
-              {...register("email")}
-              type="email"
-              maxLength={255}
-              placeholder="tu@email.com"
-              className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
-            />
-          </Field>
-          <Field label="Mensaje" error={errors.message?.message}>
-            <textarea
-              {...register("message")}
-              rows={5}
-              maxLength={1000}
-              placeholder="¿Cómo te gustaría participar?"
-              className="w-full resize-none rounded-lg border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
-            />
-          </Field>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+        ) : (
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="mt-12 space-y-8 rounded-2xl border border-border bg-card p-6 sm:p-8"
           >
-            {submitting ? "Enviando…" : "Enviar mensaje"}
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </form>
+            {/* Honeypot */}
+            <div className="absolute left-[-9999px]" aria-hidden="true">
+              <input type="text" tabIndex={-1} autoComplete="off" {...register("website")} />
+            </div>
+
+            {/* Q1 */}
+            <SurveyRadio
+              label="1. ¿Con qué frecuencia utilizas Metro?"
+              name="frecuencia"
+              register={register}
+              error={errors.frecuencia?.message}
+              options={[
+                { value: "todos-los-dias", label: "Todos los días" },
+                { value: "3-5-semana", label: "3 a 5 veces por semana" },
+                { value: "1-2-semana", label: "1 a 2 veces por semana" },
+                { value: "ocasionalmente", label: "Ocasionalmente" },
+                { value: "no-uso", label: "No utilizo Metro" },
+              ]}
+            />
+
+            {/* Q2 */}
+            <SurveyRadio
+              label="2. ¿Has sentido inseguridad, incomodidad o preocupación por una situación de acoso en Metro?"
+              name="experiencia_acoso"
+              register={register}
+              error={errors.experiencia_acoso?.message}
+              options={[
+                { value: "si", label: "Sí" },
+                { value: "no", label: "No" },
+                { value: "prefiero-no-responder", label: "Prefiero no responder" },
+              ]}
+            />
+
+            {/* Q3 */}
+            <SurveyRadio
+              label="3. Después de revisar el prototipo, ¿usarías esta plataforma para denunciar una situación de acoso?"
+              name="usaria_plataforma"
+              register={register}
+              error={errors.usaria_plataforma?.message}
+              options={[
+                { value: "si", label: "Sí" },
+                { value: "no", label: "No" },
+                { value: "tal-vez", label: "Tal vez" },
+              ]}
+            />
+
+            {/* Q4 */}
+            <Controller
+              control={control}
+              name="velocidad"
+              render={({ field }) => (
+                <ScaleQuestion
+                  label="4. ¿Qué tan rápido te parece el proceso de reporte?"
+                  minLabel="Muy lento"
+                  maxLabel="Muy rápido"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.velocidad?.message}
+                />
+              )}
+            />
+
+            {/* Q5 */}
+            <Controller
+              control={control}
+              name="discrecion"
+              render={({ field }) => (
+                <ScaleQuestion
+                  label="5. ¿Qué tan discreta te parece la forma de realizar el reporte?"
+                  minLabel="Nada discreta"
+                  maxLabel="Muy discreta"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.discrecion?.message}
+                />
+              )}
+            />
+
+            {/* Q6 */}
+            <Controller
+              control={control}
+              name="facilidad"
+              render={({ field }) => (
+                <ScaleQuestion
+                  label="6. ¿Qué tan fácil te resultó entender cómo realizar una denuncia?"
+                  minLabel="Muy difícil"
+                  maxLabel="Muy fácil"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.facilidad?.message}
+                />
+              )}
+            />
+
+            {/* Q7 */}
+            <Controller
+              control={control}
+              name="confianza"
+              render={({ field }) => (
+                <ScaleQuestion
+                  label="7. ¿Qué nivel de confianza te genera la plataforma si se explica cómo se protegen tus datos?"
+                  minLabel="Nada de confianza"
+                  maxLabel="Mucha confianza"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.confianza?.message}
+                />
+              )}
+            />
+
+            {/* Q8 */}
+            <SurveyRadio
+              label="8. ¿Crees que una opción de denuncia anónima aumentaría tu disposición a reportar?"
+              name="anonimato"
+              register={register}
+              error={errors.anonimato?.message}
+              options={[
+                { value: "si", label: "Sí" },
+                { value: "no", label: "No" },
+                { value: "tal-vez", label: "Tal vez" },
+              ]}
+            />
+
+            {/* Q9 */}
+            <SurveyRadio
+              label="9. ¿Te daría más seguridad recibir una confirmación de que el reporte fue recibido y está siendo revisado?"
+              name="confirmacion"
+              register={register}
+              error={errors.confirmacion?.message}
+              options={[
+                { value: "si", label: "Sí" },
+                { value: "no", label: "No" },
+                { value: "tal-vez", label: "Tal vez" },
+              ]}
+            />
+
+            {/* Q10 */}
+            <div>
+              <span className="mb-3 block text-sm font-semibold leading-snug">
+                10. ¿Qué mejorarías del prototipo o qué función agregarías?{" "}
+                <span className="font-normal text-muted-foreground">(opcional)</span>
+              </span>
+              <textarea
+                {...register("mejoras")}
+                rows={4}
+                maxLength={1000}
+                placeholder="Escribe tu respuesta aquí..."
+                className="w-full resize-none rounded-lg border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+            >
+              {submitting ? "Enviando…" : "Enviar respuestas"}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </form>
+        )}
       </div>
     </section>
+  );
+}
+
+/* ── Sub-componentes de la encuesta ── */
+
+function SurveyRadio({
+  label,
+  name,
+  options,
+  register,
+  error,
+}: {
+  label: string;
+  name: string;
+  options: { value: string; label: string }[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  register: any;
+  error?: string;
+}) {
+  return (
+    <fieldset>
+      <legend className="mb-3 text-sm font-semibold leading-snug">{label}</legend>
+      <div className="space-y-2">
+        {options.map((opt) => (
+          <label
+            key={opt.value}
+            className="flex cursor-pointer items-center gap-3 rounded-lg border border-input px-4 py-3 text-sm transition hover:border-primary/50 hover:bg-primary/5 has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+          >
+            <input
+              type="radio"
+              value={opt.value}
+              {...register(name)}
+              className="accent-primary"
+            />
+            {opt.label}
+          </label>
+        ))}
+      </div>
+      {error && <p className="mt-1 text-xs text-primary">{error}</p>}
+    </fieldset>
+  );
+}
+
+function ScaleQuestion({
+  label,
+  minLabel,
+  maxLabel,
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  minLabel: string;
+  maxLabel: string;
+  value: number;
+  onChange: (v: number) => void;
+  error?: string;
+}) {
+  return (
+    <fieldset>
+      <legend className="mb-3 text-sm font-semibold leading-snug">{label}</legend>
+      <div className="flex gap-2">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            className={`flex h-11 flex-1 items-center justify-center rounded-lg border text-sm font-bold transition
+              ${value === n
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-input bg-background hover:border-primary/50 hover:bg-primary/5"
+              }`}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+        <span>{minLabel}</span>
+        <span>{maxLabel}</span>
+      </div>
+      {error && <p className="mt-1 text-xs text-primary">{error}</p>}
+    </fieldset>
   );
 }
 
