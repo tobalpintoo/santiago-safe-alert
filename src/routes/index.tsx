@@ -573,7 +573,7 @@ function Footer() {
           <ShieldAlert className="h-4 w-4 text-primary" />
           App Alerta Metro
         </div>
-        <div>© {new Date().getFullYear()} — Under water, Universidad Andres Bello</div>
+        <div>© {new Date().getFullYear()} — Under Security, Universidad Andres Bello</div>
       </div>
     </footer>
   );
