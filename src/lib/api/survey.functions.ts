@@ -90,6 +90,7 @@ export const submitSurvey = createServerFn({ method: "POST" })
 
     const html = `
       <h2 style="color:#e8202a;font-family:sans-serif">Nueva respuesta — Encuesta Alerta Metro</h2>
+      <p style="font-family:sans-serif;font-size:14px"><strong>Respondido por:</strong> ${d.nombre}</p>
       <table style="font-family:sans-serif;font-size:14px;border-collapse:collapse;width:100%">
         <tr style="background:#f5f5f5">
           <td style="padding:10px 14px;font-weight:bold;width:60%">1. Frecuencia de uso del Metro</td>
@@ -147,7 +148,7 @@ export const submitSurvey = createServerFn({ method: "POST" })
         body: JSON.stringify({
           from: `Alerta Metro <${fromEmail}>`,
           to: [toEmail],
-          subject: `Nueva respuesta encuesta — Alerta Metro`,
+          subject: `Nueva respuesta encuesta — ${d.nombre} — Alerta Metro`,
           html,
         }),
       });

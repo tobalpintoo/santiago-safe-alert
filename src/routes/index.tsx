@@ -241,6 +241,7 @@ function Survey() {
     resolver: zodResolver(surveySchema),
     defaultValues: {
       website: "",
+      nombre: "",
       velocidad: 0 as unknown as number,
       discrecion: 0 as unknown as number,
       facilidad: 0 as unknown as number,
@@ -278,8 +279,8 @@ function Survey() {
             Tu opinión importa
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-sm text-muted-foreground">
-            Esta encuesta busca conocer tu opinión sobre la plataforma. Tus respuestas son
-            anónimas y se usan solo con fines académicos. Toma menos de 3 minutos.
+            Esta encuesta busca conocer tu opinión sobre la plataforma. Tus respuestas
+            se usan solo con fines académicos. Toma menos de 3 minutos.
           </p>
         </div>
 
@@ -301,6 +302,23 @@ function Survey() {
             {/* Honeypot */}
             <div className="absolute left-[-9999px]" aria-hidden="true">
               <input type="text" tabIndex={-1} autoComplete="off" {...register("website")} />
+            </div>
+
+            {/* Nombre */}
+            <div>
+              <label className="mb-3 block text-sm font-semibold">
+                Nombre completo
+              </label>
+              <input
+                {...register("nombre")}
+                type="text"
+                maxLength={100}
+                placeholder="Tu nombre"
+                className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+              />
+              {errors.nombre && (
+                <p className="mt-1 text-xs text-primary">{errors.nombre.message}</p>
+              )}
             </div>
 
             {/* Q1 */}
@@ -573,7 +591,7 @@ function Footer() {
           <ShieldAlert className="h-4 w-4 text-primary" />
           App Alerta Metro
         </div>
-        <div>© {new Date().getFullYear()} — Under Security, Universidad Andres Bello</div>
+        <div>© {new Date().getFullYear()} — Under water, Universidad Andres Bello</div>
       </div>
     </footer>
   );
